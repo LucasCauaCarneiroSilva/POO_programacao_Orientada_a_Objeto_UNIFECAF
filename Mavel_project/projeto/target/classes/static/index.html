@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estoque de Veículos</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<header class="topo">
+  <div>
+    <div class="titulo">Estoque de Veículos</div>
+    <div class="sub">Sistema Automotivo · cadastro, consulta e controle</div>
+  </div>
+  <label class="usuario">Usuário
+    <input id="usuario" type="text" maxlength="60" placeholder="seu nome" autocomplete="name">
+  </label>
+</header>
+
+<nav class="abas" role="tablist">
+  <button class="aba on" data-aba="veiculos" type="button">Veículos</button>
+  <button class="aba" data-aba="marcas" type="button">Marcas</button>
+  <button class="aba" data-aba="modelos" type="button">Modelos</button>
+  <button class="aba" data-aba="tipos" type="button">Tipos</button>
+  <button class="aba" data-aba="historico" type="button">Histórico</button>
+</nav>
+
+<div id="msg" class="msg" role="status" hidden></div>
+
+<main>
+  <!-- ======================= VEÍCULOS ======================= -->
+  <section id="aba-veiculos" class="painel">
+    <div class="kpis" id="kpis"></div>
+
+    <form id="form-filtro" class="filtros">
+      <label>Marca <select name="marcaId" id="f-marca"></select></label>
+      <label>Modelo <select name="modeloId" id="f-modelo"></select></label>
+      <label>Tipo <select name="tipoId" id="f-tipo"></select></label>
+      <label>Status <select name="status" id="f-status"></select></label>
+      <label>Ano de <input name="anoMin" type="number" min="1900" class="curto"></label>
+      <label>até <input name="anoMax" type="number" min="1900" class="curto"></label>
+      <label>Preço de <input name="precoMin" type="number" min="0" step="0.01" class="medio"></label>
+      <label>até <input name="precoMax" type="number" min="0" step="0.01" class="medio"></label>
+      <label>Cor <input name="cor" type="text" class="medio"></label>
+      <label class="largo">Busca livre <input name="texto" type="search" placeholder="ex.: tcross 2024, seda prata"></label>
+      <div class="acoes">
+        <button type="submit" class="bt">Filtrar</button>
+        <button type="button" class="bt sec" id="bt-limpar">Limpar</button>
+      </div>
+    </form>
+
+    <div class="barra-tabela">
+      <span id="contagem" class="mudo"></span>
+      <button type="button" class="bt" id="bt-novo">+ Novo veículo</button>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Marca</th><th>Modelo</th><th>Tipo</th><th class="n">Ano</th><th>Cor</th>
+            <th class="n">Preço</th><th class="n">KM</th><th>Status</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tb-veiculos"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ======================= MARCAS ======================= -->
+  <section id="aba-marcas" class="painel" hidden>
+    <form class="linha-form" data-catalogo="marcas">
+      <label class="largo">Nova marca <input name="nome" type="text" maxlength="60" required></label>
+      <button class="bt" type="submit">Adicionar</button>
+    </form>
+    <div class="tw"><table>
+      <thead><tr><th>Marca</th><th></th></tr></thead>
+      <tbody id="tb-marcas"></tbody>
+    </table></div>
+  </section>
+
+  <!-- ======================= MODELOS ======================= -->
+  <section id="aba-modelos" class="painel" hidden>
+    <form id="form-modelo" class="linha-form">
+      <input type="hidden" name="editId">
+      <label>Marca <select name="marcaId" id="m-marca" required></select></label>
+      <label class="largo">Modelo <input name="nome" type="text" maxlength="60" required></label>
+      <label>Tipo <select name="tipoId" id="m-tipo" required></select></label>
+      <button class="bt" type="submit" id="bt-modelo">Adicionar</button>
+      <button class="bt sec" type="button" id="bt-modelo-cancelar" hidden>Cancelar</button>
+    </form>
+    <div class="tw"><table>
+      <thead><tr><th>Marca</th><th>Modelo</th><th>Tipo</th><th></th></tr></thead>
+      <tbody id="tb-modelos"></tbody>
+    </table></div>
+  </section>
+
+  <!-- ======================= TIPOS ======================= -->
+  <section id="aba-tipos" class="painel" hidden>
+    <form class="linha-form" data-catalogo="tipos">
+      <label class="largo">Novo tipo <input name="nome" type="text" maxlength="40" required></label>
+      <button class="bt" type="submit">Adicionar</button>
+    </form>
+    <div class="tw"><table>
+      <thead><tr><th>Tipo de veículo</th><th></th></tr></thead>
+      <tbody id="tb-tipos"></tbody>
+    </table></div>
+  </section>
+
+  <!-- ======================= HISTÓRICO ======================= -->
+  <section id="aba-historico" class="painel" hidden>
+    <div class="linha-form">
+      <label>Entidade
+        <select id="h-entidade">
+          <option value="">Todas</option>
+          <option>Veículo</option><option>Modelo</option><option>Marca</option><option>Tipo</option>
+        </select>
+      </label>
+      <span class="mudo">Últimas 300 alterações. Exclusões continuam registradas aqui.</span>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>Data/hora</th><th>Usuário</th><th>Entidade</th><th>Registro</th><th>Ação</th><th>Detalhes</th><th>Motivo</th></tr></thead>
+      <tbody id="tb-historico"></tbody>
+    </table></div>
+  </section>
+</main>
+
+<!-- ============ Formulário do veículo (novo / editar) ============ -->
+<dialog id="dlg-veiculo">
+  <form id="form-veiculo" method="dialog">
+    <div class="dlg-cab" id="dlg-veiculo-titulo">Novo veículo</div>
+    <input type="hidden" name="editId">
+    <div class="grade">
+      <label>Marca <select id="v-marca" required></select></label>
+      <label>Modelo <select name="modeloId" id="v-modelo" required></select></label>
+      <label>Ano <input name="ano" type="number" min="1900" required></label>
+      <label>Cor <input name="cor" type="text" maxlength="30" required></label>
+      <label>Preço (R$) <input name="preco" type="number" min="0.01" step="0.01" required></label>
+      <label>Quilometragem <input name="quilometragem" type="number" min="0" step="1" required></label>
+      <label>Status <select name="status" id="v-status" required></select></label>
+    </div>
+    <div class="dlg-erro" id="v-erro" hidden></div>
+    <div class="dlg-acoes">
+      <button type="button" class="bt sec" data-fechar>Cancelar</button>
+      <button type="submit" class="bt" value="salvar">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ Remoção do veículo ============ -->
+<dialog id="dlg-remover">
+  <form id="form-remover" method="dialog">
+    <div class="dlg-cab">Remover do estoque</div>
+    <p id="rm-texto"></p>
+    <label>Motivo
+      <select name="motivo">
+        <option>Vendido</option>
+        <option>Descontinuado</option>
+        <option>Cadastro incorreto</option>
+        <option>Outro</option>
+      </select>
+    </label>
+    <div class="dlg-acoes">
+      <button type="button" class="bt sec" data-fechar>Cancelar</button>
+      <button type="submit" class="bt perigo" value="remover">Remover</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="js/app.js"></script>
+</body>
+</html>
